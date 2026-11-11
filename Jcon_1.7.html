@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Jcon</title>
+<style>
+:root{--bg:#141417;--panel:#1c1c20;--line:#2c2c33;--text:#e8e8ec;--dim:#9a9aa6;--acc:#4aa3ff}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+button{font:inherit;color:inherit;background:#26262c;border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+button:hover{background:#2f2f37}
+button.on{background:#1d3a57;border-color:var(--acc);color:#fff}
+button:disabled{opacity:.35;cursor:default}
+button.primary{background:var(--acc);border-color:var(--acc);color:#04121f;font-weight:600}
+button.primary:hover{background:#6db5ff}
+button.danger{color:#ff8a8a}
+header{height:46px;display:flex;align-items:center;gap:10px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--line);flex:none}
+.brand{font-weight:800;letter-spacing:.5px;font-size:16px;display:flex;align-items:center;gap:6px;color:var(--acc)}
+.brand b{color:var(--text)}
+#setName{background:transparent;border:1px solid transparent;color:var(--text);font:inherit;font-weight:600;padding:5px 8px;border-radius:6px;width:220px}
+#setName:hover,#setName:focus{border-color:var(--line);background:#111;outline:none}
+#dirtyMark{color:var(--dim);font-size:12px}
+.menu{position:relative}
+.menu-list{position:absolute;top:calc(100% + 4px);left:0;background:#222228;border:1px solid var(--line);border-radius:8px;padding:4px;min-width:230px;display:none;z-index:50;box-shadow:0 8px 24px #0008}
+.menu.open .menu-list{display:block}
+.menu-list button{width:100%;justify-content:space-between;background:none;border:none;padding:7px 10px}
+.menu-list button:hover{background:#30303a}
+.menu-list kbd{color:var(--dim);font:11px system-ui,sans-serif}
+.menu-list hr{border:none;border-top:1px solid var(--line);margin:4px 0}
+main{flex:1;display:grid;grid-template-columns:236px 1fr 270px;min-height:0}
+#side,#right{background:var(--panel);overflow:auto;min-height:0}
+#side{border-right:1px solid var(--line);display:flex;flex-direction:column}
+#right{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:18px}
+.sec h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);font-weight:600}
+#list{display:flex;flex-direction:column;gap:2px;padding:6px;flex:1;overflow:auto}
+.sidebtns{padding:8px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line)}
+.iconrow{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.iconrow button{padding:3px;justify-content:center}
+.item{width:100%;justify-content:flex-start;background:none;border:1px solid transparent;padding:6px;gap:10px;text-align:left}
+.item.sel{background:#1d3a57;border-color:var(--acc)}
+.thumb{width:32px;height:32px;image-rendering:pixelated;image-rendering:crisp-edges;background:#f2f2f2;border-radius:4px;flex:none}
+.item .t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.item .m{display:block;color:var(--dim);font-size:11px}
+#center{display:flex;flex-direction:column;min-width:0;min-height:0}
+#tools{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--panel);align-items:center}
+#tools button{padding:5px}
+#tools button.txt{padding:6px 10px}
+.sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+#stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative;overflow:hidden}
+#cv{touch-action:none;box-shadow:0 0 0 1px var(--line),0 10px 30px #0006;cursor:crosshair}
+#hint{padding:6px 10px;color:var(--dim);font-size:11px;text-align:center;border-top:1px solid var(--line)}
+#empty{text-align:center;color:var(--dim)}
+#swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.sw{aspect-ratio:1;padding:0;position:relative;border:2px solid transparent;border-radius:6px;box-shadow:inset 0 0 0 1px #fff3;min-height:30px}
+.sw.sel{border-color:#fff;box-shadow:0 0 0 2px var(--acc)}
+.sw.ink{background:linear-gradient(135deg,#111 50%,#f2f2f2 50%)}
+.sw:disabled{opacity:.3;filter:grayscale(1);cursor:not-allowed}
+.field.off{opacity:.4}
+.sw span{position:absolute;right:3px;bottom:1px;font-size:9px;color:#fff;text-shadow:0 0 2px #000,0 0 2px #000}
+#colorEdit{display:flex;gap:8px;margin-top:10px;align-items:center}
+#colorEdit.off,#inkEdit.off{display:none}
+#inkEdit{display:flex;gap:8px;margin-top:10px;align-items:center}
+#inkIn{width:44px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:none}
+#inkHex{width:100px;font-family:ui-monospace,Menlo,Consolas,monospace}
+#inkAuto.on{background:#1d3a57;border-color:var(--acc);color:#fff}
+#colorIn{width:44px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:none}
+input[type=text],select,textarea{background:#111114;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 8px;font:inherit}
+#hexIn{width:100px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.note{color:var(--dim);font-size:11px;margin-top:8px}
+#iconInfo{margin-bottom:8px}
+#iconInfo .ti{font-weight:600;font-size:14px;word-break:break-word}
+#preview{display:flex;flex-direction:column;gap:6px}
+.pv{display:flex;gap:10px;align-items:flex-end;padding:10px;border-radius:8px;overflow:hidden;min-height:40px}
+.pv.light{background:#f2f2f2}
+.pv.dark{background:#0e0e11;border:1px solid var(--line)}
+.pv canvas{image-rendering:pixelated;image-rendering:crisp-edges;flex:none}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px}
+#right.disabled .needs{opacity:.35;pointer-events:none}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal[hidden]{display:none}
+#confirmModal{z-index:200}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;width:min(460px,100%);max-height:100%;overflow:auto;box-shadow:0 20px 60px #000a}
+.box h2{margin:0 0 14px;font-size:18px}
+.box p{margin:0 0 12px;white-space:pre-line}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field>label,.field>.lbl{font-size:12px;color:var(--dim)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;flex-wrap:wrap}
+.or{color:var(--dim);text-align:center;margin:14px 0;font-size:12px}
+.wide{width:100%;justify-content:center}
+textarea{width:100%;min-height:200px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;resize:vertical}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2a2a32;border:1px solid var(--line);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:300}
+#toast.show{opacity:1}
+@media (max-width:860px){
+  body{overflow:auto}
+  main{flex:none;grid-template-columns:1fr;grid-template-rows:auto auto auto}
+  #side{border-right:none;border-bottom:1px solid var(--line);overflow:visible}
+  #list{flex:none;flex-direction:row;overflow-x:auto;overflow-y:hidden}
+  .item{width:auto;flex:none;min-height:50px}
+  #center{height:70vh}
+  #right{border-left:none;border-top:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span data-icon="logo"></span><b>Jcon</b></div>
+  <div class="menu" id="fileMenu">
+    <button id="fileBtn" aria-haspopup="true">File</button>
+    <div class="menu-list" role="menu">
+      <button data-act="newset">New Set…</button>
+      <button data-act="open">Open Set…</button>
+      <button data-act="import">Import Icons…</button>
+      <button data-act="paste">Paste Block…</button>
+      <hr>
+      <button data-act="save">Save Set <kbd>Ctrl+S</kbd></button>
+      <button data-act="export">Export…</button>
+      <hr>
+      <button data-act="copyset">Copy Set Block</button>
+      <button data-act="copyicon">Copy Icon Block</button>
+    </div>
+  </div>
+  <input type="text" id="setName" maxlength="60" aria-label="Set name" spellcheck="false">
+  <span id="dirtyMark"></span>
+</header>
+
+<main>
+  <aside id="side">
+    <div class="sec" style="padding:10px 10px 0"><h3>Icons <span id="count"></span></h3></div>
+    <div id="list"></div>
+    <div class="sidebtns">
+      <button id="newIconBtn" class="primary wide" data-icon="newicon" title="New icon (N)">New Icon</button>
+      <div class="iconrow">
+        <button id="dupBtn" data-icon="dup" title="Duplicate icon" aria-label="Duplicate icon"></button>
+        <button id="settingsBtn" data-icon="settings" title="Icon settings" aria-label="Icon settings"></button>
+        <button id="upBtn" data-icon="up" title="Move icon up (in the list)" aria-label="Move icon up"></button>
+        <button id="downBtn" data-icon="down" title="Move icon down (in the list)" aria-label="Move icon down"></button>
+        <button id="delBtn" class="danger" data-icon="del" title="Delete icon" aria-label="Delete icon"></button>
+      </div>
+    </div>
+  </aside>
+
+  <section id="center">
+    <div id="tools">
+      <button data-tool="pencil" data-icon="pencil" title="Draw (B)" aria-label="Draw"></button>
+      <button data-tool="eraser" data-icon="eraser" title="Erase (E) · right-click also erases" aria-label="Erase"></button>
+      <button data-tool="fill" data-icon="bucket" title="Fill (G)" aria-label="Fill"></button>
+      <button data-tool="picker" data-icon="picker" title="Pick color from icon (I)" aria-label="Pick color"></button>
+      <span class="sep"></span>
+      <button id="mirrorBtn" data-icon="mirror" title="Mirror left/right (M)" aria-label="Mirror"></button>
+      <button id="gridBtn" data-icon="grid" title="Grid lines (H)" aria-label="Grid lines"></button>
+      <button id="darkBtn" data-icon="theme" title="Edit on dark background (T)" aria-label="Dark background"></button>
+      <span class="sep"></span>
+      <button id="flipBtn" data-icon="flip" title="Flip art left/right (X)" aria-label="Flip"></button>
+      <button id="rotBtn" data-icon="rotate" title="Rotate art 90° clockwise (R)" aria-label="Rotate 90 degrees"></button>
+      <span class="sep"></span>
+      <button id="undoBtn" data-icon="undo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
+      <button id="redoBtn" data-icon="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"></button>
+      <button id="clearBtn" data-icon="clear" title="Clear all pixels (undoable)" aria-label="Clear"></button>
+    </div>
+    <div id="stage">
+      <canvas id="cv" aria-label="Icon canvas"></canvas>
+      <div id="empty" hidden><p>No icons in this set yet.</p><button class="primary" id="emptyNew" data-icon="newicon">New Icon</button></div>
+    </div>
+    <div id="hint">B draw · E erase · G fill · I pick · M mirror · X flip · R rotate · 1–9 colors · right-click erases · ↑↓ switch icons · N new icon</div>
+  </section>
+
+  <aside id="right">
+    <div class="sec needs">
+      <h3>Icon</h3>
+      <div id="iconInfo"></div>
+    </div>
+    <div class="sec needs">
+      <h3>Palette</h3>
+      <div id="swatches"></div>
+      <div id="colorEdit">
+        <input type="color" id="colorIn" aria-label="Edit selected color">
+        <input type="text" id="hexIn" maxlength="7" spellcheck="false" aria-label="Hex color">
+      </div>
+      <div id="inkEdit" class="off">
+        <input type="color" id="inkIn" aria-label="Ink view color">
+        <input type="text" id="inkHex" maxlength="7" spellcheck="false" aria-label="Ink view hex color">
+        <button id="inkAuto" title="Go back to black on light, white on dark">Auto</button>
+      </div>
+      <div class="note" id="palNote"></div>
+    </div>
+    <div class="sec needs">
+      <h3>Preview</h3>
+      <div id="preview"></div>
+    </div>
+  </aside>
+</main>
+
+<!-- Start -->
+<div class="modal" id="startModal" hidden>
+  <div class="box">
+    <h2>Jcon</h2>
+    <div class="field">
+      <label for="ssName">New set name</label>
+      <input type="text" id="ssName" maxlength="60" value="My Icons" spellcheck="false">
+    </div>
+    <button class="primary wide" id="ssCreate">Create New Set</button>
+    <div class="or">or</div>
+    <div class="actions" style="justify-content:center">
+      <button id="ssOpen">Open Set File…</button>
+      <button id="ssPaste">Paste a Block…</button>
+      <button id="ssCancel" hidden>Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- New icon / settings -->
+<div class="modal" id="iconModal" hidden>
+  <div class="box">
+    <h2 id="imHead">New icon</h2>
+    <div class="field">
+      <label for="imName">Title (used as the aria-label)</label>
+      <input type="text" id="imName" maxlength="60" spellcheck="false">
+    </div>
+    <div class="field"><span class="lbl">Grid size</span><div class="seg" id="imSize"></div></div>
+    <div class="field"><span class="lbl">Type</span>
+      <div class="seg" id="imType">
+        <button data-val="theme">Theme colored</button>
+        <button data-val="color">Full color</button>
+      </div>
+      <div class="note" id="imTypeNote"></div>
+    </div>
+    <div class="field" id="imPalRow"><span class="lbl">Palette size</span>
+      <div class="seg" id="imPal"><button data-val="8">8 colors</button><button data-val="16">16 colors</button></div>
+    </div>
+    <div class="actions"><button id="imCancel">Cancel</button><button class="primary" id="imOk">Create</button></div>
+  </div>
+</div>
+
+<!-- Export image -->
+<div class="modal" id="exportModal" hidden>
+  <div class="box">
+    <h2>Export</h2>
+    <div class="field"><span class="lbl">Format</span>
+      <div class="seg" id="exFmt"><button data-val="png">PNG</button><button data-val="jpeg">JPEG</button><button data-val="gif">GIF</button><button data-val="svg">SVG</button></div>
+      <div class="note" id="exFmtNote"></div>
+    </div>
+    <div class="field"><span class="lbl">Size</span>
+      <div class="seg" id="exScale"><button data-val="1">1×</button><button data-val="2">2×</button><button data-val="4">4×</button><button data-val="8">8×</button><button data-val="16">16×</button></div>
+      <div class="note" id="exSizeNote"></div>
+    </div>
+    <div class="field" id="exBgRow"><span class="lbl">Background</span>
+      <div class="seg" id="exBg"><button data-val="none">Transparent</button><button data-val="color">Color</button><input type="color" id="exBgColor" value="#ffffff" aria-label="Background color"></div>
+    </div>
+    <div class="field" id="exInkRow"><label for="exInk">Theme ink color</label>
+      <div class="seg"><input type="color" id="exInk" value="#000000"><span class="note" style="margin:0;align-self:center;flex:1">Images can't follow the page's text color, so ink gets a fixed color.</span></div>
+    </div>
+    <div class="field"><span class="lbl">What to export</span>
+      <div class="seg" id="exScope"><button data-val="icon">This icon</button><button data-val="set">Whole set (.zip)</button></div>
+    </div>
+    <div class="actions"><button id="exCancel">Cancel</button><button class="primary" id="exGo">Export</button></div>
+  </div>
+</div>
+
+<!-- Paste -->
+<div class="modal" id="pasteModal" hidden>
+  <div class="box">
+    <h2>Paste a Jcon block</h2>
+    <p class="note" style="margin-top:0">Paste one or more icons that Jcon exported (a single icon block, a set block, or a saved set file's contents).</p>
+    <textarea id="pasteText" spellcheck="false"></textarea>
+    <div class="actions"><button id="pasteCancel">Cancel</button><button id="pasteAdd">Add to This Set</button><button class="primary" id="pasteOpen">Open as New Set</button></div>
+  </div>
+</div>
+
+<!-- Text (copy fallback) -->
+<div class="modal" id="textModal" hidden>
+  <div class="box">
+    <h2>Copy this block</h2>
+    <p class="note" style="margin-top:0">Your browser blocked automatic copying here, so select the text below and copy it.</p>
+    <textarea id="textOut" readonly spellcheck="false"></textarea>
+    <div class="actions"><button class="primary" id="textClose">Done</button></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="modal" id="confirmModal" hidden>
+  <div class="box">
+    <p id="cMsg"></p>
+    <div class="actions"><button id="cCancel">Cancel</button><button class="primary" id="cOk">OK</button></div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+<input type="file" id="fileIn" accept=".html,.htm,.svg,.txt,text/html,image/svg+xml,text/plain" hidden>
+
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const PRESETS = [8, 12, 16, 24, 32];
+const MAX_N = 64;
+const HEX = '0123456789abcdef';
+const MAX_UNDO = 100;
+const MAX_FILE = 8 * 1024 * 1024;
+const DEFAULT_PAL = ['#000000','#ffffff','#e43b44','#f77622','#fee761','#3e8948','#0099db','#8b48c4',
+                     '#5a6988','#c0cbdc','#9e2835','#b86f50','#63c74d','#2ce8f5','#124e89','#f04f78'];
+
+// ---------- UI icons (drawn with Jcon's own pixel format) ----------
+const UI = {
+  logo:["................", "..#####.######..", "..######.#####..", "..#####.#.####..", "......#..#......", "......#...#.....", "......#....#....", "......#.....#...", "......#......#..", ".###..#.....###.", ".###..#..#..#...", ".###..#.###.#...", ".########.#..#..", "..#######..#.#..", "...#####...###..", "................"],
+  pencil:["................", "..........###...", ".........#..##..", "........###..##.", ".......#.###.##.", "......#...#####.", ".....#..#..###..", "....#..#..###...", "...#..#..###....", "..#..#..###.....", ".#.##..###......", ".#..#.###.......", ".#...###........", ".##...#.........", ".#####..........", "................"],
+  eraser:["................", ".........###....", "........#...#...", ".......#.....#..", "......#.......#.", ".....#........#.", "....#........##.", "...#........###.", "..#.#......###..", ".#...#....###...", ".#....#..###....", "..#....####.....", "...#...###......", "....#.###.......", "....##########..", "................"],
+  bucket:["................", ".....###...##...", "....#...#.#.#...", "...#....##.#....", "..#....#..#.....", "..#####..#.#....", ".#####..#...#...", ".####........#..", ".####.........#.", ".####.........#.", ".####........#..", "..####......#...", "..##..#....#....", ".###...#..#.....", ".####...##......", "................"],
+  picker:["................", ".........####...", "........#....#..", "........#....##.", "......###...###.", ".......#...####.", "......#.#.#####.", ".....#...#.###..", "....#.....##....", "...#.....#.#....", "..#.....#.......", "..######........", "..#####.........", ".#####..........", "..#.............", "................"],
+  mirror:["................", "...##...#..##...", "..#..#.#..#..#..", ".#.##...#..##.#.", ".#.###.#..###.#.", "..#.##..#.##.#..", "...#...#....#...", "....##..#.##....", "...#...#....#...", "..#.##..#.##.#..", ".#.###.#..###.#.", ".#.###..#.###.#.", ".#.###.#..###.#.", "..#.....#....#..", "...###.#..###...", "........#......."],
+  grid:["................", "..#############.", ".##..#..#..#..#.", ".##..#..#..#..#.", ".##############.", ".##..#..#..#..#.", ".##..#..#..#..#.", ".##############.", ".##..#..#..#..#.", ".##..#..#..#..#.", ".##############.", ".##..#..#..#..#.", ".##..#..#..#..#.", ".##############.", ".#############..", "................"],
+  theme:["########........", "########........", "######..##......", "####..##..##....", "###.####....#...", "###.####....#...", "##.#####.....#..", "##.#####.....#..", "##.#####.....#..", "##.#####.....#..", "###.####....#...", "###.####....#...", "####..##..##....", "######..##......", "########........", "########........"],
+  flip:["................", "................", "................", ".....#....#.....", "....##...###....", "...#.#...##.#...", "..#..######..#..", ".#............#.", ".##..######..#..", "..##.######.#...", "...###...###....", "....##...##.....", ".....#...#......", "................", "................", "................"],
+  rotate:["................", ".....#####......", "....#.....#.....", "...#..###..#....", "..#..#####..#...", ".##.#...###.#...", ".##.#....##.#...", ".##.#..####.###.", ".##.#..##.....#.", ".##..#..##...#..", ".###..##.##.#...", "..###.....##....", "...#######......", "....#####.......", "................", "................"],
+  undo:["................", "........#######.", ".......#......#.", "......#.......#.", ".....#...######.", "....##..######..", "....##..#.......", "....##..#.......", "....##..#.......", ".#####..####....", ".##.......#.....", "..##.....#......", "...##...#.......", "....##.#........", ".....##.........", "................"],
+  redo:["................", ".#######........", ".#......#.......", ".#.......#......", ".######...#.....", "..######...#....", ".......##..#....", ".......##..#....", ".......##..#....", "....#####..####.", "....###.......#.", ".....###.....#..", "......###...#...", ".......###.#....", "........###.....", "................"],
+  clear:["................", "..#....#.#....#.", ".#.#.....#......", "..#..#.##.##....", ".....#...#...#..", ".#..#.#..#..#.#.", "...#...#.....#..", ".##.....##......", "...#...#...#....", "....#.#..#.#.#..", ".#...#....###...", "..#..#..###.###.", ".###......###...", "..#...#..#.#.#..", "...........#....", "................"],
+  newicon:["................", "...##########...", "..#..........#..", ".##...........#.", ".##....###....#.", ".##....#.#....#.", ".##..###.###..#.", ".##..#.....#..#.", ".##..###.###..#.", ".##....#.#....#.", ".##....###....#.", ".##...........#.", ".###..........#.", ".#############..", "..###########...", "................"],
+  dup:["................", "..#######.......", ".##......#......", ".##......#......", ".##..#...#......", ".##...#.........", ".##....#.#####..", ".##.....#.....#.", ".####.##.#..#.#.", "..###.##..#.#.#.", "......##...##.#.", "......##.####.#.", "......##......#.", "......#########.", ".......#######..", "................"],
+  up:["................", "........#.......", ".......#.#......", "......#...#.....", ".....#.....#....", "....#.......#...", "...#.........#..", "..#####...#####.", "......#...#.....", "......#...#.....", "......#...#.....", "......#...#.....", "......#...#.....", "......#...#.....", "......#####.....", "................"],
+  down:["................", ".....#####......", ".....#...#......", ".....#...#......", ".....#...#......", ".....#...#......", ".....#...#......", ".....#...#......", ".#####...#####..", "..#.........#...", "...#.......#....", "....#.....#.....", ".....#...#......", "......#.#.......", ".......#........", "................"],
+  settings:[".......##.......", "......#..#......", ".######..######.", "......##.#......", ".......##.......", "............##..", "...........#..#.", ".###########..#.", "...........##.#.", "............##..", "...##...........", "..#..#..........", ".##..##########.", "..##.#..........", "...##...........", "................"],
+  del:["................", "......####......", ".....##..##.....", "...###.##.###...", "..#..#....#..#..", "..#..........#..", "..############..", "...##########...", "...##.#.#.#.#...", "...##.#.#.#.#...", "...##.#.#.#.#...", "...##.#.#.#.#...", "...##.#.#.#.#...", "...####.#.#.#...", "...####.#.###...", "....########...."]
+};
+
+function rowsPath(rows){
+  let d = '';
+  rows.forEach((r, y) => {
+    let x = 0;
+    while (x < r.length){
+      if (r[x] !== '#'){ x++; continue; }
+      let x2 = x; while (x2 < r.length && r[x2] === '#') x2++;
+      d += `M${x} ${y}h${x2-x}v1h-${x2-x}z`; x = x2;
+    }
+  });
+  return d;
+}
+function uiIcon(rows, px){
+  const ns = 'http://www.w3.org/2000/svg';
+  const s = document.createElementNS(ns, 'svg');
+  s.setAttribute('viewBox', `0 0 ${rows[0].length} ${rows.length}`);
+  s.setAttribute('width', px); s.setAttribute('height', px);
+  s.setAttribute('shape-rendering', 'crispEdges');
+  s.setAttribute('aria-hidden', 'true');
+  const p = document.createElementNS(ns, 'path');
+  p.setAttribute('fill', 'currentColor'); p.setAttribute('d', rowsPath(rows));
+  s.appendChild(p); return s;
+}
+document.querySelectorAll('[data-icon]').forEach(el => {
+  const rows = UI[el.dataset.icon]; if (rows) el.prepend(uiIcon(rows, rows.length * 2));
+});
+
+// ---------- state ----------
+let uid = 1;
+const S = { name: 'My Icons', scale: 2, icons: [], cur: -1 };
+let dirty = false, started = false;
+let tool = 'pencil', paint = 1, mirror = false, gridOn = false, dark = false;
+let lastSize = 16, lastMode = 'theme', lastPalN = 8;
+const cur = () => S.icons[S.cur] || null;
+
+function makeIcon(title, size, mode, pal, grid){
+  return { id: uid++, title, size, mode, pal: mode === 'color' ? pal.slice() : [],
+           grid: grid || new Uint8Array(size * size), undo: [], redo: [] };
+}
+function snapshot(ic){ return { title: ic.title, size: ic.size, mode: ic.mode, pal: ic.pal.slice(), grid: ic.grid.slice() }; }
+function restore(ic, s){ ic.title = s.title; ic.size = s.size; ic.mode = s.mode; ic.pal = s.pal.slice(); ic.grid = s.grid.slice(); }
+function commitSnap(ic, snap){
+  ic.undo.push(snap); if (ic.undo.length > MAX_UNDO) ic.undo.shift();
+  ic.redo = []; markDirty();
+}
+function cleanTitle(t){
+  if (typeof t !== 'string') return '';
+  return t.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 60);
+}
+function validatePaint(){
+  const ic = cur(); if (!ic) return;
+  if (ic.mode === 'theme' || paint - 2 >= ic.pal.length) paint = 1;
+}
+function markDirty(){ dirty = true; $('dirtyMark').textContent = '● unsaved'; }
+function markClean(){ dirty = false; $('dirtyMark').textContent = ''; }
+
+// ---------- encode / export ----------
+function codeChar(c){ return c === 0 ? '.' : c === 1 ? '#' : HEX[c - 2]; }
+function encode(ic){
+  const N = ic.size, rows = [];
+  for (let y = 0; y < N; y++){
+    let r = ''; for (let x = 0; x < N; x++) r += codeChar(ic.grid[y * N + x]); rows.push(r);
+  }
+  const o = { v: 1, n: ic.title, s: N, m: ic.mode === 'color' ? 'c' : 't' };
+  if (ic.mode === 'color') o.p = ic.pal.slice();
+  o.g = rows.join('/');
+  return o;
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function commentSafe(s){ return String(s).replace(/-/g, '\u2010').replace(/[<>]/g, ' '); }
+function pathsFor(ic){
+  const N = ic.size, g = ic.grid, map = new Map();
+  for (let y = 0; y < N; y++){
+    let x = 0;
+    while (x < N){
+      const c = g[y * N + x]; if (!c){ x++; continue; }
+      let x2 = x + 1; while (x2 < N && g[y * N + x2] === c) x2++;
+      map.set(c, (map.get(c) || '') + `M${x} ${y}h${x2-x}v1h-${x2-x}z`); x = x2;
+    }
+  }
+  return [...map.entries()].sort((a, b) => a[0] - b[0]);
+}
+function svgString(ic){
+  const N = ic.size, w = N * S.scale;
+  let s = `<svg class="jcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${N} ${N}" width="${w}" height="${w}" shape-rendering="crispEdges" role="img" aria-label="${esc(ic.title)}" data-jcon="${esc(JSON.stringify(encode(ic)))}">`;
+  for (const [c, d] of pathsFor(ic)) s += `<path fill="${c === 1 ? 'currentColor' : ic.pal[c - 2]}" d="${d}"/>`;
+  return s + '</svg>';
+}
+function metaComment(){
+  const j = JSON.stringify({ n: S.name, x: S.scale }).replace(/-/g,'\\u002d').replace(/</g,'\\u003c').replace(/>/g,'\\u003e');
+  return `<!-- jcon-set: ${j} -->`;
+}
+function iconBlock(ic){ return `<!-- jcon: ${commentSafe(ic.title)} -->\n${svgString(ic)}`; }
+function setBlock(){ return metaComment() + '\n' + S.icons.map(iconBlock).join('\n') + '\n'; }
+function setDocument(){
+  const cells = S.icons.map(ic => `<div class="cell">\n${iconBlock(ic)}\n<span>${esc(ic.title)}</span>\n</div>`).join('\n');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+<title>${esc(S.name)} \u2014 Jcon set</title>
+<style>body{font:14px system-ui,sans-serif;margin:24px;background:#fafafa;color:#111}.grid{display:flex;flex-wrap:wrap;gap:12px}.cell{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;padding:14px;background:#fff;border:1px solid #ddd;border-radius:8px;min-width:100px}.cell span{font-size:12px;color:#555;max-width:140px;text-align:center;word-break:break-word}</style>
+</head>
+<body>
+${metaComment()}
+<h1>${esc(S.name)}</h1>
+<p>Made with Jcon. Open this file in Jcon to keep editing.</p>
+<div class="grid">
+${cells}
+</div>
+</body>
+</html>
+`;
+}
+function safeName(s){ return (String(s).replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '').trim() || 'icons').slice(0, 60); }
+function download(name, text, type){
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+async function copyText(text, label){
+  let ok = false;
+  try { if (navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(text); ok = true; } } catch(e){}
+  if (!ok){
+    try {
+      const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta);
+      ta.select(); ok = document.execCommand('copy'); ta.remove();
+    } catch(e){}
+  }
+  if (ok) toast(label + ' copied'); else { $('textOut').value = text; openModal('textModal'); $('textOut').select(); }
+  return ok;
+}
+function saveSet(){
+  if (!started) return;
+  download(safeName(S.name) + '.jcon.html', setDocument(), 'text/html');
+  markClean(); toast('Set saved');
+}
+
+// ---------- import ----------
+function decode(o){
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+  const N = o.s;
+  if (!Number.isInteger(N) || N < 1 || N > MAX_N) return null;
+  const mode = o.m === 'c' ? 'color' : o.m === 't' ? 'theme' : null;
+  if (!mode) return null;
+  let pal = [];
+  if (mode === 'color'){
+    if (!Array.isArray(o.p) || (o.p.length !== 8 && o.p.length !== 16)) return null;
+    for (const p of o.p) if (typeof p !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(p)) return null;
+    pal = o.p.map(p => p.toLowerCase());
+  }
+  if (typeof o.g !== 'string' || o.g.length > MAX_N * (MAX_N + 1)) return null;
+  const rows = o.g.split('/');
+  if (rows.length !== N) return null;
+  const grid = new Uint8Array(N * N);
+  for (let y = 0; y < N; y++){
+    const r = rows[y]; if (r.length !== N) return null;
+    for (let x = 0; x < N; x++){
+      const ch = r[x];
+      let c;
+      if (ch === '.') c = 0;
+      else if (ch === '#') c = 1;
+      else {
+        const i = HEX.indexOf(ch);
+        if (i < 0 || mode === 'theme' || i >= pal.length) return null;
+        c = i + 2;
+      }
+      grid[y * N + x] = c;
+    }
+  }
+  return makeIcon(cleanTitle(o.n) || 'Untitled', N, mode, pal, grid);
+}
+function parseText(text){
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  const els = doc.querySelectorAll('svg[data-jcon]');
+  const icons = []; let bad = 0;
+  els.forEach(el => {
+    try { const ic = decode(JSON.parse(el.getAttribute('data-jcon'))); if (ic) icons.push(ic); else bad++; }
+    catch(e){ bad++; }
+  });
+  let meta = null;
+  const m = text.match(/<!--\s*jcon-set:\s*(\{[\s\S]*?\})\s*-->/);
+  if (m){
+    try {
+      const j = JSON.parse(m[1]);
+      meta = { n: cleanTitle(j.n), x: [1,2,3,4,8,16].includes(j.x) ? j.x : 2 };
+    } catch(e){}
+  }
+  return { icons, bad, meta };
+}
+async function handleImport(text, mode, fname){
+  if (text.length > MAX_FILE){ await info('That is too big to be a Jcon set.'); return; }
+  let r;
+  try { r = parseText(text); } catch(e){ await info('Jcon couldn\u2019t read that.'); return; }
+  if (!r.icons.length){
+    await info('No Jcon icons were found in that ' + (fname ? 'file' : 'text') + '.' + (r.bad ? ` ${r.bad} icon block(s) were damaged.` : '') + '\nJcon can open blocks and set files that it exported.');
+    return;
+  }
+  if (mode === 'open'){
+    if (started && dirty && !(await ask('Replace the current set? Unsaved changes will be lost.', 'Replace'))) return;
+    S.name = (r.meta && r.meta.n) || (fname ? cleanTitle(fname.replace(/\.jcon\.html?$|\.html?$|\.svg$|\.txt$/i, '')) : '') || 'My Icons';
+    S.scale = r.meta ? r.meta.x : 2;
+    S.icons = r.icons; S.cur = 0; started = true;
+    closeModal('startModal'); closeModal('pasteModal');
+    markClean();
+  } else {
+    const first = S.icons.length;
+    S.icons.push(...r.icons); S.cur = first;
+    closeModal('pasteModal'); markDirty();
+  }
+  validatePaint(); renderAll();
+  toast(`Loaded ${r.icons.length} icon${r.icons.length > 1 ? 's' : ''}` + (r.bad ? ` · skipped ${r.bad} damaged` : ''));
+}
+
+// ---------- drawing helpers ----------
+const ink = d => d ? '#f2f2f2' : '#111111';
+const colorOf = (ic, v, d) => v === 1 ? ink(d) : ic.pal[v - 2];
+function drawIconTo(cv, ic, scale, d){
+  const N = ic.size; cv.width = N * scale; cv.height = N * scale;
+  const c = cv.getContext('2d'); c.clearRect(0, 0, cv.width, cv.height);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const v = ic.grid[y * N + x];
+    if (v){ c.fillStyle = colorOf(ic, v, d); c.fillRect(x * scale, y * scale, scale, scale); }
+  }
+}
+
+// ---------- editor canvas ----------
+const cv = $('cv'), ctx = cv.getContext('2d');
+let cell = 16, dpr = 1;
+function layout(){
+  const ic = cur(); if (!ic) return;
+  const st = $('stage');
+  const avail = Math.min(st.clientWidth, st.clientHeight) - 32;
+  cell = Math.max(4, Math.floor(avail / ic.size));
+  dpr = window.devicePixelRatio || 1;
+  const px = cell * ic.size;
+  cv.style.width = px + 'px'; cv.style.height = px + 'px';
+  cv.width = Math.round(px * dpr); cv.height = Math.round(px * dpr);
+  drawEditor();
+}
+function drawEditor(){
+  const ic = cur(); if (!ic) return;
+  const N = ic.size;
+  ctx.setTransform(cv.width / (cell * N), 0, 0, cv.height / (cell * N), 0, 0);
+  const c1 = dark ? '#26262b' : '#f4f4f4', c2 = dark ? '#1f1f23' : '#e7e7e7';
+  const inkC = inkView || ink(dark);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const v = ic.grid[y * N + x];
+    ctx.fillStyle = v === 1 ? inkC : v ? ic.pal[v - 2] : ((x + y) & 1 ? c2 : c1);
+    ctx.fillRect(x * cell, y * cell, cell, cell);
+  }
+  const lw = 1 / dpr;
+  if (gridOn && cell >= 6){
+    const gw = cell >= 40 ? 3 : cell >= 16 ? 2 : 1;
+    ctx.fillStyle = dark ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.28)';
+    for (let i = 1; i < N; i++){
+      ctx.fillRect(i * cell - gw / 2, 0, gw, N * cell);
+      ctx.fillRect(0, i * cell - gw / 2, N * cell, gw);
+    }
+  }
+  if (mirror){
+    ctx.fillStyle = 'rgba(74,163,255,.9)';
+    ctx.fillRect(N / 2 * cell - lw, 0, lw * 2, N * cell);
+  }
+}
+function cellAt(e){
+  const ic = cur(), r = cv.getBoundingClientRect();
+  return { x: Math.floor((e.clientX - r.left) / r.width * ic.size), y: Math.floor((e.clientY - r.top) / r.height * ic.size) };
+}
+function setPx(ic, x, y, v){
+  const N = ic.size;
+  if (x < 0 || y < 0 || x >= N || y >= N) return false;
+  const i = y * N + x; if (ic.grid[i] === v) return false;
+  ic.grid[i] = v; return true;
+}
+function line(x0, y0, x1, y1, fn){
+  const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1, dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+  let err = dx + dy;
+  for (let guard = 0; guard < 1000; guard++){
+    fn(x0, y0);
+    if (x0 === x1 && y0 === y1) break;
+    const e2 = 2 * err;
+    if (e2 >= dy){ err += dy; x0 += sx; }
+    if (e2 <= dx){ err += dx; y0 += sy; }
+  }
+}
+function flood(ic, sx, sy, v){
+  const N = ic.size, g = ic.grid;
+  if (sx < 0 || sy < 0 || sx >= N || sy >= N) return false;
+  const t = g[sy * N + sx]; if (t === v) return false;
+  const st = [sy * N + sx];
+  while (st.length){
+    const i = st.pop(); if (g[i] !== t) continue;
+    g[i] = v; const x = i % N, y = (i / N) | 0;
+    if (x > 0) st.push(i - 1); if (x < N - 1) st.push(i + 1);
+    if (y > 0) st.push(i - N); if (y < N - 1) st.push(i + N);
+  }
+  return true;
+}
+let stroke = null;
+function plot(x, y){
+  const ic = stroke.ic;
+  if (setPx(ic, x, y, stroke.val)) stroke.changed = true;
+  if (mirror && setPx(ic, ic.size - 1 - x, y, stroke.val)) stroke.changed = true;
+}
+cv.addEventListener('contextmenu', e => e.preventDefault());
+cv.addEventListener('pointerdown', e => {
+  const ic = cur(); if (!ic || stroke || e.button === 1) return;
+  e.preventDefault();
+  let t = tool; if (e.button === 2) t = 'eraser';
+  const p = cellAt(e);
+  if (p.x < 0 || p.y < 0 || p.x >= ic.size || p.y >= ic.size) return;
+  if (t === 'picker'){
+    const v = ic.grid[p.y * ic.size + p.x];
+    if (v){ paint = v; tool = 'pencil'; } else tool = 'eraser';
+    renderTools(); renderPalette(); return;
+  }
+  const snap = snapshot(ic);
+  if (t === 'fill'){
+    let ch = flood(ic, p.x, p.y, paint);
+    if (mirror) ch = flood(ic, ic.size - 1 - p.x, p.y, paint) || ch;
+    if (ch){ commitSnap(ic, snap); afterEdit(); }
+    return;
+  }
+  try { cv.setPointerCapture(e.pointerId); } catch(err){}
+  stroke = { ic, snap, val: t === 'eraser' ? 0 : paint, last: p, changed: false, id: e.pointerId };
+  plot(p.x, p.y); drawEditor();
+});
+cv.addEventListener('pointermove', e => {
+  if (!stroke || e.pointerId !== stroke.id || stroke.ic !== cur()) return;
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  const N = stroke.ic.size;
+  for (const ev of (evs.length ? evs : [e])){
+    const p = cellAt(ev);
+    p.x = Math.max(-1, Math.min(N, p.x)); p.y = Math.max(-1, Math.min(N, p.y));
+    if (p.x === stroke.last.x && p.y === stroke.last.y) continue;
+    line(stroke.last.x, stroke.last.y, p.x, p.y, plot);
+    stroke.last = p;
+  }
+  drawEditor();
+});
+function endStroke(e){
+  if (!stroke || (e && e.pointerId !== stroke.id)) return;
+  const s = stroke; stroke = null;
+  if (s.changed){ commitSnap(s.ic, s.snap); afterEdit(); }
+}
+cv.addEventListener('pointerup', endStroke);
+cv.addEventListener('pointercancel', endStroke);
+cv.addEventListener('lostpointercapture', endStroke);
+
+function afterEdit(){
+  drawEditor(); renderPreview(); updateThumb(S.cur); updateUndo();
+}
+function undo(){
+  const ic = cur(); if (!ic || stroke || !ic.undo.length) return;
+  ic.redo.push(snapshot(ic)); restore(ic, ic.undo.pop()); validatePaint(); markDirty(); renderAll();
+}
+function redo(){
+  const ic = cur(); if (!ic || stroke || !ic.redo.length) return;
+  ic.undo.push(snapshot(ic)); restore(ic, ic.redo.pop()); validatePaint(); markDirty(); renderAll();
+}
+function transformIcon(fn){
+  const ic = cur(); if (!ic || stroke || !ic.grid.some(v => v)) return;
+  const N = ic.size, g = ic.grid, out = new Uint8Array(N * N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){ const [nx, ny] = fn(x, y, N); out[ny * N + nx] = g[y * N + x]; }
+  const snap = snapshot(ic); ic.grid = out; commitSnap(ic, snap); afterEdit();
+}
+const flipArt = () => transformIcon((x, y, N) => [N - 1 - x, y]);
+const rotateArt = () => transformIcon((x, y, N) => [N - 1 - y, x]);
+function clearIcon(){
+  const ic = cur(); if (!ic || !ic.grid.some(v => v)) return;
+  const snap = snapshot(ic); ic.grid.fill(0); commitSnap(ic, snap); afterEdit();
+}
+
+// ---------- rendering ----------
+function renderTools(){
+  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === tool));
+  $('mirrorBtn').classList.toggle('on', mirror);
+  $('gridBtn').classList.toggle('on', gridOn);
+  $('darkBtn').classList.toggle('on', dark);
+}
+function updateUndo(){
+  const ic = cur();
+  $('undoBtn').disabled = !ic || !ic.undo.length;
+  $('redoBtn').disabled = !ic || !ic.redo.length;
+}
+function renderList(){
+  const box = $('list'); box.textContent = '';
+  S.icons.forEach((ic, i) => {
+    const b = document.createElement('button');
+    b.className = 'item' + (i === S.cur ? ' sel' : '');
+    const c = document.createElement('canvas'); c.className = 'thumb'; drawIconTo(c, ic, 1, false);
+    const w = document.createElement('div');
+    const t = document.createElement('span'); t.className = 't'; t.textContent = ic.title;
+    const m = document.createElement('span'); m.className = 'm';
+    m.textContent = `${ic.size}×${ic.size} · ${ic.mode === 'color' ? ic.pal.length + ' colors' : 'theme'}`;
+    w.append(t, m); b.append(c, w);
+    b.onclick = () => select(i);
+    box.appendChild(b);
+  });
+  $('count').textContent = S.icons.length ? `(${S.icons.length})` : '';
+  const sel = box.children[S.cur]; if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+function updateThumb(i){
+  const b = $('list').children[i], ic = S.icons[i];
+  if (b && ic) drawIconTo(b.querySelector('canvas'), ic, 1, false);
+}
+function renderPalette(){
+  const ic = cur(), box = $('swatches'); box.textContent = '';
+  if (!ic) return;
+  const vals = [1]; if (ic.mode === 'color') ic.pal.forEach((_, i) => vals.push(i + 2));
+  vals.forEach((v, k) => {
+    const b = document.createElement('button');
+    b.className = 'sw' + (v === paint ? ' sel' : '');
+    if (v === 1){ b.classList.add('ink'); b.title = 'Theme ink: takes the color of the surrounding text'; }
+    else { b.style.background = ic.pal[v - 2]; b.title = `Color ${v - 1}: ${ic.pal[v - 2]}`; }
+    b.setAttribute('aria-label', b.title);
+    if (k < 9){ const n = document.createElement('span'); n.textContent = k + 1; b.appendChild(n); }
+    b.onclick = () => { paint = v; if (tool === 'eraser' || tool === 'picker') tool = 'pencil'; renderTools(); renderPalette(); };
+    box.appendChild(b);
+  });
+  const ed = $('colorEdit');
+  if (ic.mode === 'color' && paint >= 2){
+    ed.classList.remove('off');
+    $('colorIn').value = ic.pal[paint - 2]; $('hexIn').value = ic.pal[paint - 2];
+  } else ed.classList.add('off');
+  const ie = $('inkEdit');
+  ie.classList.toggle('off', paint !== 1);
+  if (paint === 1){
+    const shown = inkView || ink(dark);
+    $('inkIn').value = shown; $('inkHex').value = shown;
+    $('inkAuto').classList.toggle('on', !inkView);
+  }
+  const inkNote = 'Ink view color only changes how ink looks while you edit. Exports still use currentColor.';
+  $('palNote').textContent = ic.mode === 'theme'
+    ? 'Theme icon: only ink is available. Ink exports as currentColor, so it matches the text color wherever it sits. ' + (paint === 1 ? inkNote : '')
+    : `${ic.pal.length} colors + theme ink. ` + (paint === 1 ? inkNote : 'Editing a color updates every pixel that uses it.');
+}
+function renderPreview(){
+  const ic = cur(), box = $('preview'); box.textContent = '';
+  if (!ic) return;
+  [false, true].forEach(d => {
+    const row = document.createElement('div'); row.className = 'pv ' + (d ? 'dark' : 'light');
+    [1, 2, 4].forEach(s => {
+      const c = document.createElement('canvas'); drawIconTo(c, ic, s, d);
+      c.style.width = ic.size * s + 'px'; c.style.height = ic.size * s + 'px';
+      c.title = s + '×'; row.appendChild(c);
+    });
+    box.appendChild(row);
+  });
+}
+function renderInfo(){
+  const ic = cur(), box = $('iconInfo'); box.textContent = '';
+  if (!ic){ ['dupBtn','settingsBtn','upBtn','downBtn','delBtn'].forEach(id => $(id).disabled = true); return; }
+  const t = document.createElement('div'); t.className = 'ti'; t.textContent = ic.title;
+  const m = document.createElement('div'); m.className = 'note'; m.style.marginTop = '2px';
+  m.textContent = `${ic.size}×${ic.size} · ${ic.mode === 'color' ? 'full color, ' + ic.pal.length + ' colors' : 'theme colored'}`;
+  box.append(t, m);
+  $('upBtn').disabled = S.cur <= 0;
+  $('downBtn').disabled = S.cur >= S.icons.length - 1;
+  $('dupBtn').disabled = $('settingsBtn').disabled = $('delBtn').disabled = false;
+}
+function renderAll(){
+  const has = !!cur();
+  cv.hidden = !has; $('empty').hidden = has || !started;
+  $('right').classList.toggle('disabled', !has);
+  $('setName').value = S.name;
+  renderList(); renderTools(); renderPalette(); renderInfo(); renderPreview(); updateUndo();
+  layout();
+}
+function select(i){
+  if (i < 0 || i >= S.icons.length) return;
+  endStroke(); S.cur = i; validatePaint(); renderAll();
+}
+new ResizeObserver(() => layout()).observe($('stage'));
+
+// ---------- palette editing ----------
+let palEditing = false;
+function setPalColor(hex, pushUndo){
+  const ic = cur(); if (!ic || ic.mode !== 'color' || paint < 2) return;
+  hex = hex.toLowerCase();
+  if (ic.pal[paint - 2] === hex) return;
+  if (pushUndo) commitSnap(ic, snapshot(ic)); else markDirty();
+  ic.pal[paint - 2] = hex;
+  $('hexIn').value = hex;
+  const sw = $('swatches').children[paint - 1];
+  if (sw){ sw.style.background = hex; sw.title = `Color ${paint - 1}: ${hex}`; }
+  afterEdit();
+}
+$('colorIn').addEventListener('input', e => { const first = !palEditing; palEditing = true; setPalColor(e.target.value, first); });
+$('colorIn').addEventListener('change', e => { setPalColor(e.target.value, !palEditing); palEditing = false; });
+$('hexIn').addEventListener('change', e => {
+  let v = e.target.value.trim(); if (!v.startsWith('#')) v = '#' + v;
+  if (/^#[0-9a-fA-F]{3}$/.test(v)) v = '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+  if (/^#[0-9a-fA-F]{6}$/.test(v)){ setPalColor(v, true); $('colorIn').value = v.toLowerCase(); }
+  else { const ic = cur(); e.target.value = ic && paint >= 2 ? ic.pal[paint - 2] : ''; toast('Use a hex color like #ff8800'); }
+});
+
+// ---------- ink view color (editor only) ----------
+let inkView = null;
+function setInkView(hex){
+  inkView = hex ? hex.toLowerCase() : null;
+  const shown = inkView || ink(dark);
+  $('inkIn').value = shown; $('inkHex').value = shown;
+  $('inkAuto').classList.toggle('on', !inkView);
+  drawEditor();
+}
+$('inkIn').addEventListener('input', e => setInkView(e.target.value));
+$('inkHex').addEventListener('change', e => {
+  let v = e.target.value.trim(); if (!v.startsWith('#')) v = '#' + v;
+  if (/^#[0-9a-fA-F]{3}$/.test(v)) v = '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) setInkView(v);
+  else { e.target.value = inkView || ink(dark); toast('Use a hex color like #ff8800'); }
+});
+$('inkAuto').onclick = () => setInkView(null);
+
+// ---------- modals ----------
+function openModal(id){
+  $(id).hidden = false;
+  const f = $(id).querySelector('input[type=text],textarea'); if (f) setTimeout(() => f.focus(), 0);
+}
+function closeModal(id){ $(id).hidden = true; }
+const isOpen = id => !$(id).hidden;
+let confirmDone = null;
+function ask(msg, okText, noCancel){
+  return new Promise(res => {
+    $('cMsg').textContent = msg; $('cOk').textContent = okText || 'OK';
+    $('cCancel').hidden = !!noCancel;
+    openModal('confirmModal');
+    confirmDone = v => { confirmDone = null; closeModal('confirmModal'); res(v); };
+  });
+}
+const info = msg => ask(msg, 'OK', true);
+$('cOk').onclick = () => confirmDone && confirmDone(true);
+$('cCancel').onclick = () => confirmDone && confirmDone(false);
+function closeTop(){
+  if (isOpen('confirmModal')){ confirmDone && confirmDone(false); return; }
+  if (isOpen('textModal')){ closeModal('textModal'); return; }
+  if (isOpen('pasteModal')){ closeModal('pasteModal'); return; }
+  if (isOpen('exportModal')){ closeModal('exportModal'); return; }
+  if (isOpen('iconModal')){ closeModal('iconModal'); return; }
+  if (isOpen('startModal') && started){ closeModal('startModal'); return; }
+}
+function seg(id, val){ $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.val === String(val))); }
+function segVal(id){ const b = $(id).querySelector('button.on'); return b ? b.dataset.val : null; }
+['imType', 'imPal'].forEach(id => $(id).addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; seg(id, b.dataset.val); updateIconModal();
+}));
+$('imSize').addEventListener('click', e => { const b = e.target.closest('button'); if (b) seg('imSize', b.dataset.val); });
+
+// start
+function showStart(){
+  $('ssCancel').hidden = !started; $('ssName').value = 'My Icons'; openModal('startModal');
+}
+$('ssCreate').onclick = () => {
+  S.name = cleanTitle($('ssName').value) || 'My Icons'; S.scale = 2;
+  S.icons = []; S.cur = -1; started = true; markClean();
+  closeModal('startModal'); renderAll(); openIconModal('new');
+};
+$('ssOpen').onclick = () => { fileMode = 'open'; $('fileIn').click(); };
+$('ssPaste').onclick = () => openPaste('open');
+$('ssCancel').onclick = () => closeModal('startModal');
+
+// icon modal
+let imMode = 'new';
+function openIconModal(mode){
+  if (!started) return;
+  const ic = cur(); if (mode === 'edit' && !ic) return;
+  imMode = mode;
+  $('imHead').textContent = mode === 'new' ? 'New icon' : 'Icon settings';
+  $('imOk').textContent = mode === 'new' ? 'Create' : 'Apply';
+  $('imName').value = mode === 'new' ? `Icon ${S.icons.length + 1}` : ic.title;
+  const sizes = PRESETS.slice(); if (mode === 'edit' && !sizes.includes(ic.size)) sizes.push(ic.size);
+  const sb = $('imSize'); sb.textContent = '';
+  sizes.sort((a, b) => a - b).forEach(n => { const b = document.createElement('button'); b.dataset.val = n; b.textContent = `${n}×${n}`; sb.appendChild(b); });
+  seg('imSize', mode === 'new' ? lastSize : ic.size);
+  seg('imType', mode === 'new' ? lastMode : ic.mode);
+  seg('imPal', mode === 'new' || ic.mode !== 'color' ? lastPalN : ic.pal.length);
+  updateIconModal(); openModal('iconModal');
+  setTimeout(() => $('imName').select(), 0);
+}
+function updateIconModal(){
+  const t = segVal('imType');
+  $('imPalRow').classList.toggle('off', t !== 'color');
+  $('imPal').querySelectorAll('button').forEach(b => b.disabled = t !== 'color');
+  $('imTypeNote').textContent = t === 'color'
+    ? 'Pick your own colors (plus theme ink if you want parts to follow the text color).'
+    : 'One color, "ink", that follows the text color of wherever the icon is placed.';
+}
+function palFor(n){
+  let base = DEFAULT_PAL;
+  for (let i = S.icons.length - 1; i >= 0; i--) if (S.icons[i].mode === 'color'){ base = S.icons[i].pal; break; }
+  return n <= base.length ? base.slice(0, n) : base.concat(DEFAULT_PAL.slice(base.length, n));
+}
+function resizeGrid(g, N, M){
+  const out = new Uint8Array(M * M), off = Math.floor((M - N) / 2); let lost = 0;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const v = g[y * N + x]; if (!v) continue;
+    const nx = x + off, ny = y + off;
+    if (nx < 0 || ny < 0 || nx >= M || ny >= M){ lost++; continue; }
+    out[ny * M + nx] = v;
+  }
+  return { grid: out, lost };
+}
+$('imOk').onclick = async () => {
+  const title = cleanTitle($('imName').value) || 'Untitled';
+  const size = parseInt(segVal('imSize'), 10), mode = segVal('imType'), palN = parseInt(segVal('imPal'), 10);
+  if (!size || !mode) return;
+  lastSize = PRESETS.includes(size) ? size : lastSize; lastMode = mode; if (mode === 'color') lastPalN = palN;
+  if (imMode === 'new'){
+    const ic = makeIcon(title, size, mode, mode === 'color' ? palFor(palN) : []);
+    S.icons.push(ic); S.cur = S.icons.length - 1;
+    paint = mode === 'color' ? 2 : 1; tool = 'pencil';
+    closeModal('iconModal'); markDirty(); renderAll(); return;
+  }
+  const ic = cur(); if (!ic) return;
+  const warn = [];
+  let g = ic.grid, pal = ic.pal.slice();
+  if (size !== ic.size){
+    const r = resizeGrid(g, ic.size, size); g = r.grid;
+    if (r.lost) warn.push(`${r.lost} pixel(s) fall outside the new ${size}×${size} grid and will be cut off.`);
+  } else g = g.slice();
+  if (mode === 'theme' && ic.mode === 'color'){
+    const n = g.reduce((a, v) => a + (v >= 2 ? 1 : 0), 0);
+    if (n) warn.push(`${n} colored pixel(s) will become theme ink.`);
+    pal = [];
+  }
+  if (mode === 'color'){
+    if (ic.mode === 'theme') pal = palFor(palN);
+    else if (palN < pal.length){
+      const n = g.reduce((a, v) => a + (v >= 2 + palN ? 1 : 0), 0);
+      if (n) warn.push(`${n} pixel(s) use colors ${palN + 1}–${pal.length} and will be erased.`);
+      pal = pal.slice(0, palN);
+    } else if (palN > pal.length) pal = pal.concat(DEFAULT_PAL.slice(pal.length, palN));
+  }
+  if (warn.length && !(await ask(warn.join('\n') + '\n\nYou can undo this.', 'Apply'))) return;
+  for (let i = 0; i < g.length; i++){
+    if (mode === 'theme' && g[i] >= 2) g[i] = 1;
+    if (mode === 'color' && g[i] >= 2 + pal.length) g[i] = 0;
+  }
+  const snap = snapshot(ic);
+  ic.title = title; ic.size = size; ic.mode = mode; ic.pal = pal; ic.grid = g;
+  commitSnap(ic, snap);
+  closeModal('iconModal'); validatePaint(); renderAll();
+};
+$('imCancel').onclick = () => closeModal('iconModal');
+$('imName').addEventListener('keydown', e => { if (e.key === 'Enter') $('imOk').click(); });
+$('ssName').addEventListener('keydown', e => { if (e.key === 'Enter') $('ssCreate').click(); });
+
+// paste
+let pasteMode = 'add';
+function openPaste(mode){
+  pasteMode = mode; $('pasteText').value = '';
+  $('pasteAdd').hidden = !started || mode === 'open';
+  openModal('pasteModal');
+}
+$('pasteCancel').onclick = () => closeModal('pasteModal');
+$('pasteAdd').onclick = () => handleImport($('pasteText').value, 'add');
+$('pasteOpen').onclick = () => handleImport($('pasteText').value, 'open');
+$('textClose').onclick = () => closeModal('textModal');
+
+// files
+let fileMode = 'open';
+$('fileIn').addEventListener('change', async () => {
+  const f = $('fileIn').files[0]; $('fileIn').value = '';
+  if (!f) return;
+  if (f.size > MAX_FILE){ await info('That file is too big to be a Jcon set (over 8 MB).'); return; }
+  let text;
+  try { text = await f.text(); } catch(e){ await info('Jcon couldn\u2019t read that file.'); return; }
+  handleImport(text, fileMode, f.name);
+});
+
+// ---------- menu & buttons ----------
+const menu = $('fileMenu');
+$('fileBtn').onclick = e => { e.stopPropagation(); menu.classList.toggle('open'); };
+document.addEventListener('pointerdown', e => { if (!menu.contains(e.target)) menu.classList.remove('open'); });
+menu.querySelector('.menu-list').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  menu.classList.remove('open');
+  switch (b.dataset.act){
+    case 'newset':
+      if (dirty && !(await ask('Start a new set? Unsaved changes will be lost.', 'New Set'))) return;
+      showStart(); break;
+    case 'open': fileMode = 'open'; $('fileIn').click(); break;
+    case 'import': fileMode = 'add'; $('fileIn').click(); break;
+    case 'paste': openPaste('add'); break;
+    case 'save': saveSet(); break;
+    case 'export':
+      if (!cur()){ toast('Add an icon first'); return; }
+      openExport(); break;
+    case 'copyicon':
+      if (!cur()){ toast('No icon selected'); return; }
+      copyText(iconBlock(cur()), 'Icon block'); break;
+    case 'copyset':
+      if (!S.icons.length){ toast('The set is empty'); return; }
+      if (await copyText(setBlock(), 'Set block')) markClean();
+      break;
+  }
+});
+document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+function setTool(t){ tool = t; renderTools(); }
+$('mirrorBtn').onclick = () => { mirror = !mirror; renderTools(); drawEditor(); };
+$('gridBtn').onclick = () => { gridOn = !gridOn; renderTools(); drawEditor(); };
+$('darkBtn').onclick = () => { dark = !dark; renderTools(); renderPalette(); drawEditor(); };
+$('undoBtn').onclick = undo;
+$('redoBtn').onclick = redo;
+$('clearBtn').onclick = clearIcon;
+$('flipBtn').onclick = flipArt;
+$('rotBtn').onclick = rotateArt;
+$('newIconBtn').onclick = () => openIconModal('new');
+$('emptyNew').onclick = () => openIconModal('new');
+$('settingsBtn').onclick = () => openIconModal('edit');
+$('dupBtn').onclick = () => {
+  const ic = cur(); if (!ic) return;
+  const c = makeIcon(cleanTitle(ic.title + ' copy'), ic.size, ic.mode, ic.pal, ic.grid.slice());
+  S.icons.splice(S.cur + 1, 0, c); S.cur++; markDirty(); renderAll();
+};
+function move(d){
+  const i = S.cur, j = i + d; if (j < 0 || j >= S.icons.length) return;
+  [S.icons[i], S.icons[j]] = [S.icons[j], S.icons[i]]; S.cur = j; markDirty(); renderAll();
+}
+$('upBtn').onclick = () => move(-1);
+$('downBtn').onclick = () => move(1);
+$('delBtn').onclick = async () => {
+  const ic = cur(); if (!ic) return;
+  if (!(await ask(`Delete "${ic.title}"? This can't be undone.`, 'Delete'))) return;
+  S.icons.splice(S.cur, 1); S.cur = Math.min(S.cur, S.icons.length - 1); markDirty(); validatePaint(); renderAll();
+};
+$('setName').addEventListener('input', e => { S.name = cleanTitle(e.target.value) || 'My Icons'; markDirty(); });
+$('setName').addEventListener('blur', e => { e.target.value = S.name; });
+
+// ---------- keyboard ----------
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ if (document.querySelector('.modal:not([hidden])')) closeTop(); else menu.classList.remove('open'); return; }
+  if (document.querySelector('.modal:not([hidden])')) return;
+  const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+  if (mod && k === 's'){ e.preventDefault(); saveSet(); return; }
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (mod){
+    if (k === 'z'){ e.preventDefault(); e.shiftKey ? redo() : undo(); }
+    else if (k === 'y'){ e.preventDefault(); redo(); }
+    return;
+  }
+  if (e.altKey || !started) return;
+  switch (k){
+    case 'b': case 'p': setTool('pencil'); break;
+    case 'e': setTool('eraser'); break;
+    case 'g': case 'f': setTool('fill'); break;
+    case 'i': setTool('picker'); break;
+    case 'm': $('mirrorBtn').click(); break;
+    case 'h': $('gridBtn').click(); break;
+    case 't': $('darkBtn').click(); break;
+    case 'x': flipArt(); break;
+    case 'r': rotateArt(); break;
+    case 'n': e.preventDefault(); openIconModal('new'); break;
+    case 'arrowup': e.preventDefault(); select(S.cur - 1); break;
+    case 'arrowdown': e.preventDefault(); select(S.cur + 1); break;
+    default:
+      if (/^[1-9]$/.test(k)){
+        const btn = $('swatches').children[+k - 1]; if (btn) btn.click();
+      }
+  }
+});
+
+// ---------- image export (PNG / JPEG / GIF, single or zipped set) ----------
+const EX = { fmt: 'png', scale: 4, bg: 'none', bgColor: '#ffffff', ink: '#000000', scope: 'icon' };
+const exIcons = () => EX.scope === 'set' ? S.icons : (cur() ? [cur()] : []);
+function openExport(){
+  if (!cur()) return;
+  seg('exFmt', EX.fmt); seg('exScale', EX.scale); seg('exBg', EX.bg); seg('exScope', EX.scope);
+  $('exBgColor').value = EX.bgColor; $('exInk').value = EX.ink;
+  if (EX.fmt === 'svg') seg('exScale', S.scale);
+  updateExport(); openModal('exportModal');
+}
+function readExport(){
+  EX.fmt = segVal('exFmt'); EX.scale = parseInt(segVal('exScale'), 10) || 4;
+  EX.bg = segVal('exBg'); EX.scope = segVal('exScope');
+  EX.bgColor = $('exBgColor').value.toLowerCase(); EX.ink = $('exInk').value.toLowerCase();
+}
+function updateExport(){
+  readExport();
+  const tb = $('exBg').querySelector('[data-val=none]');
+  tb.disabled = EX.fmt === 'jpeg';
+  if (EX.fmt === 'jpeg' && EX.bg === 'none'){ seg('exBg', 'color'); EX.bg = 'color'; }
+  $('exBgColor').disabled = EX.bg !== 'color';
+  $('exFmtNote').textContent = {
+    png: 'Best for pixel art: sharp, lossless, keeps transparency.',
+    jpeg: 'No transparency, and compression can slightly smudge hard pixel edges. PNG or GIF is usually better for icons.',
+    gif: 'Sharp and tiny, keeps transparency (fully on or off).',
+    svg: 'The same code as Copy Icon Block, as a file. Ink stays currentColor and it scales to any size. This size is also used by Copy Icon/Set Block and Save Set.'
+  }[EX.fmt];
+  const isSvg = EX.fmt === 'svg';
+  $('exBgRow').classList.toggle('off', isSvg);
+  $('exBgRow').querySelectorAll('button,input').forEach(el => { if (isSvg) el.disabled = true; });
+  if (!isSvg){ $('exBg').querySelectorAll('button').forEach(b => b.disabled = b.dataset.val === 'none' && EX.fmt === 'jpeg'); $('exBgColor').disabled = EX.bg !== 'color'; }
+  const ic = cur();
+  $('exSizeNote').textContent = EX.scope === 'set'
+    ? `Each icon at ${EX.scale}× its grid size (a 16×16 icon becomes ${16 * EX.scale}×${16 * EX.scale}px).`
+    : `${ic.size * EX.scale}×${ic.size * EX.scale}px`;
+  $('exInkRow').hidden = isSvg || !exIcons().some(i => i.grid.includes(1));
+}
+['exFmt', 'exScale', 'exBg', 'exScope'].forEach(id => $(id).addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.disabled) return; seg(id, b.dataset.val); updateExport();
+}));
+function rasterColor(ic, v){ return v === 1 ? EX.ink : ic.pal[v - 2]; }
+function rasterCanvas(ic, s, bg){
+  const c = document.createElement('canvas'), N = ic.size; c.width = c.height = N * s;
+  const x = c.getContext('2d');
+  if (bg){ x.fillStyle = bg; x.fillRect(0, 0, c.width, c.height); }
+  for (let y = 0; y < N; y++) for (let i = 0; i < N; i++){
+    const v = ic.grid[y * N + i];
+    if (v){ x.fillStyle = rasterColor(ic, v); x.fillRect(i * s, y * s, s, s); }
+  }
+  return c;
+}
+function canvasBytes(c, type){
+  return new Promise((res, rej) => c.toBlob(b => b ? b.arrayBuffer().then(a => res(new Uint8Array(a)), rej) : rej(new Error('encode failed')), type, 0.95));
+}
+const hexRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+function lzw(px, minCode){
+  const clear = 1 << minCode, eoi = clear + 1;
+  let size = minCode + 1, next = eoi + 1, dict = new Map(), acc = 0, nb = 0;
+  const out = [];
+  const emit = c => { acc |= c << nb; nb += size; while (nb >= 8){ out.push(acc & 255); acc >>>= 8; nb -= 8; } };
+  emit(clear);
+  let prefix = px[0];
+  for (let i = 1; i < px.length; i++){
+    const k = px[i], key = prefix * 4096 + k, f = dict.get(key);
+    if (f !== undefined){ prefix = f; continue; }
+    emit(prefix);
+    if (next === 4096){ emit(clear); dict = new Map(); next = eoi + 1; size = minCode + 1; }
+    else { if (next >= (1 << size)) size++; dict.set(key, next++); }
+    prefix = k;
+  }
+  emit(prefix); emit(eoi);
+  if (nb > 0) out.push(acc & 255);
+  return out;
+}
+function gifEncode(w, h, px, cols, trans){
+  let bits = 1; while ((1 << bits) < cols.length) bits++;
+  const out = [], str = s => { for (const ch of s) out.push(ch.charCodeAt(0)); }, u16 = v => out.push(v & 255, (v >> 8) & 255);
+  str('GIF89a'); u16(w); u16(h); out.push(0x80 | (bits - 1), 0, 0);
+  for (let i = 0; i < (1 << bits); i++){ const c = cols[i] || [0, 0, 0]; out.push(c[0], c[1], c[2]); }
+  if (trans >= 0) out.push(0x21, 0xF9, 4, 1, 0, 0, trans, 0);
+  out.push(0x2C); u16(0); u16(0); u16(w); u16(h); out.push(0);
+  const minCode = Math.max(2, bits); out.push(minCode);
+  const data = lzw(px, minCode);
+  for (let i = 0; i < data.length; i += 255){
+    const n = Math.min(255, data.length - i); out.push(n);
+    for (let j = 0; j < n; j++) out.push(data[i + j]);
+  }
+  out.push(0, 0x3B);
+  return new Uint8Array(out);
+}
+function gifFor(ic, s, bg){
+  const N = ic.size, cols = [], idx = new Map();
+  const add = hex => { hex = hex.toLowerCase(); if (!idx.has(hex)){ idx.set(hex, cols.length); cols.push(hexRgb(hex)); } return idx.get(hex); };
+  let trans = -1, bgIdx;
+  if (bg) bgIdx = add(bg); else { cols.push([0, 0, 0]); trans = 0; bgIdx = 0; }
+  const map = new Uint8Array(N * N);
+  for (let i = 0; i < N * N; i++){ const v = ic.grid[i]; map[i] = v ? add(rasterColor(ic, v)) : bgIdx; }
+  const W = N * s, px = new Uint8Array(W * W);
+  for (let y = 0; y < W; y++){ const row = ((y / s) | 0) * N; for (let x = 0; x < W; x++) px[y * W + x] = map[row + ((x / s) | 0)]; }
+  return gifEncode(W, W, px, cols, trans);
+}
+function iconImage(ic){
+  if (EX.fmt === 'svg') return Promise.resolve(new TextEncoder().encode(svgString(ic) + '\n'));
+  const bg = EX.bg === 'color' || EX.fmt === 'jpeg' ? EX.bgColor : null;
+  if (EX.fmt === 'gif') return Promise.resolve(gifFor(ic, EX.scale, bg));
+  return canvasBytes(rasterCanvas(ic, EX.scale, bg), EX.fmt === 'png' ? 'image/png' : 'image/jpeg');
+}
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b){ let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(files){
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  for (const f of files){
+    const name = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, 0, true); h.setUint16(12, 33, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true);
+    h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, 0, true); c.setUint16(14, 33, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true);
+    c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    parts.push(new Uint8Array(h.buffer), name, f.data);
+    central.push(new Uint8Array(c.buffer), name);
+    off += 30 + name.length + sz;
+  }
+  const cdSize = central.reduce((a, p) => a + p.length, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+  e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+  return new Blob([...parts, ...central, new Uint8Array(e.buffer)], { type: 'application/zip' });
+}
+$('exCancel').onclick = () => closeModal('exportModal');
+$('exGo').onclick = async () => {
+  readExport();
+  const isSvg = EX.fmt === 'svg';
+  if (isSvg && S.scale !== EX.scale){ S.scale = EX.scale; markDirty(); }
+  const ext = EX.fmt === 'jpeg' ? 'jpg' : EX.fmt, mime = isSvg ? 'image/svg+xml' : 'image/' + EX.fmt;
+  const list = exIcons(); if (!list.length) return;
+  $('exGo').disabled = true;
+  try {
+    if (EX.scope === 'icon'){
+      const bytes = await iconImage(list[0]);
+      download(safeName(list[0].title) + '.' + ext, bytes, mime);
+    } else {
+      const used = new Set(), files = [];
+      for (const ic of list){
+        let base = safeName(ic.title), name = base + '.' + ext, n = 2;
+        while (used.has(name.toLowerCase())) name = `${base}_${n++}.${ext}`;
+        used.add(name.toLowerCase());
+        files.push({ name, data: await iconImage(ic) });
+      }
+      const url = URL.createObjectURL(makeZip(files));
+      const a = document.createElement('a'); a.href = url; a.download = `${safeName(S.name)}_${ext}.zip`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+    closeModal('exportModal'); toast('Export done');
+  } catch(err){ await info('That export didn’t work. Try PNG, or a smaller size.'); }
+  finally { $('exGo').disabled = false; }
+};
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+window.addEventListener('beforeunload', e => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+
+renderAll();
+showStart();
+})();
+</script>
+</body>
+</html>
